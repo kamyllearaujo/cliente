@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 
-from .forms import ClienteForm
+from .forms import ClienteForm, UsuarioForm
 from .models import Cliente 
 
 
@@ -71,13 +71,29 @@ def login_usuario(request):
           if usuario is not None:
                 login(request, usuario)
                 return redirect('novo_cliente')
-          else:
-                return HttpResponse('<h1>Usuário ou senha inválidos<h1>')
         else:
+                return HttpResponse('<h1>Usuário ou senha inválidos<h1>')
+    else:
             form = AuthenticationForm()
             context = {
                 'form': form
             }
         
-        return render(request, template_name, context)
+    return render(request, template_name, context)
+
  
+def novo_usuario(request):
+    template_name = 'novo_usuario.html'
+    if request.method =='POST':
+        form = UsuarioForm(request.POST)
+        if form.is_valid():
+          f = form.save(commit=False)
+          f.set_password(f.password)
+          f.save()
+          return redirect('login_usuario')
+        else:
+          return HttpResponse('Erro ao criar usuário')
+    else:
+        form = UsuarioForm()
+    context = {'form': form}
+    return render(request, template_name, context)
